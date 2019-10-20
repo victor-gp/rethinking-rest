@@ -28,7 +28,12 @@ class Query(graphene.ObjectType):
     def resolve_users(self, info):
         return UserModel.objects.all()
 
-    def resolve_books(self, info):
+    def resolve_books(self, info, fiction):
+        q = Book.objects.all
+
+        if fiction:
+            q = q.filter(fiction=fiction)
+
         return Book.objects.all()
 
 schema = graphene.Schema(query=Query)
