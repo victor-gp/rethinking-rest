@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app.apps.BibliographConfig',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +50,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+GRAPHENE = {
+    'SCHEMA': 'app.schema.schema'
+}
 
 ROOT_URLCONF = 'django_server.urls'
 

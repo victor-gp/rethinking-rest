@@ -19,11 +19,13 @@ const queryRepoList = `
 {
   viewer {
     name
-    repositories(first: 12, orderBy: {field: CREATED_AT, direction: DESC}) {
+    repositories (first: 12,
+      orderBy: {field: CREATED_AT, direction: DESC}
+    ) {
       totalCount
       nodes {
         name
-        openIssues: issues(states: OPEN) {
+        openIssues: issues (states: OPEN) {
           totalCount
         }
         openPRs: pullRequests(states: OPEN) {
@@ -83,7 +85,7 @@ $(window).ready(function() {
         <p>${repo.ref.target.history.totalCount} commits</p>
         </li>`;
         $('ul.repos').append(card);
-      });
+      })
     }
   });
 });

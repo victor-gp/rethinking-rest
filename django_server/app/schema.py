@@ -1,6 +1,5 @@
 import graphene
 import graphene_django
-
 from django.contrib.auth.backends import UserModel
 from .models import Book, HasRead
 
@@ -14,30 +13,27 @@ class UserType(graphene_django.DjangoObjectType):
         model = UserModel
         only_fields = ('id', 'username', 'books_read')
 
-
 class BookType(graphene_django.DjangoObjectType):
     class Meta:
         model = Book
 
-
 class HasReadType(graphene_django.DjangoObjectType):
     class Meta:
-        model = HasRead  
-
+        model = HasRead
 
 class Query(graphene.ObjectType):
     users = graphene.List(UserType)
-    books = graphene.List(BookType, fiction=graphene.Boolean())
+    books = graphene.List(BookType)
 
     def resolve_users(self, info):
         return UserModel.objects.all()
 
     def resolve_books(self, info, fiction):
-        q = Book.objects.all()
+        q = Book.objects.all
 
         if fiction:
             q = q.filter(fiction=fiction)
-        return q
 
-        
+        return Book.objects.all()
+
 schema = graphene.Schema(query=Query)
