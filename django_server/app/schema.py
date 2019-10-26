@@ -14,6 +14,19 @@ class UserType(graphene_django.DjangoObjectType):
         only_fields = ('id', 'username', 'books_read')
 
 class BookType(graphene_django.DjangoObjectType):
+    average_rating = graphene.Float()
+
+    def resolve_average_rating(self, info):
+        all_book_reads = HasRead.objects.all()
+        this_book_reads = all_book_reads.filter(book=self.id)
+        book_ratings = list(map(lambda read: read.rating, this_book_reads))
+
+        # print(f"${self.title}: ${book_ratings}") # control
+
+        if book_ratings:
+            return sum(book_ratings) / len(book_ratings)
+        else: return None
+
     class Meta:
         model = Book
 
