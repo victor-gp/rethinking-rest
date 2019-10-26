@@ -23,17 +23,18 @@ class HasReadType(graphene_django.DjangoObjectType):
 
 class Query(graphene.ObjectType):
     users = graphene.List(UserType)
-    books = graphene.List(BookType)
+    books = graphene.List(BookType, fiction=graphene.Boolean())
 
     def resolve_users(self, info):
         return UserModel.objects.all()
 
-    def resolve_books(self, info, fiction):
-        q = Book.objects.all
+    def resolve_books(self, info, **kwargs):
+        q = Book.objects.all()
 
-        if fiction:
+        fiction = kwargs.get('fiction')
+        if fiction is not None:
             q = q.filter(fiction=fiction)
 
-        return Book.objects.all()
+        return q
 
 schema = graphene.Schema(query=Query)
