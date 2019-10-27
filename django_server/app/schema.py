@@ -1,7 +1,7 @@
 import graphene
 import graphene_django
 from django.contrib.auth.backends import UserModel
-from .models import Book, HasRead
+from .models import Book, HasRead, read_book
 
 class UserType(graphene_django.DjangoObjectType):
     is_admin = graphene.Boolean()
@@ -50,4 +50,22 @@ class Query(graphene.ObjectType):
 
         return q
 
-schema = graphene.Schema(query=Query)
+class ReadBookMutation(graphene.Mutation):
+    class Arguments:
+        username = graphene.String()
+        book_title = graphene.String()
+        rating = graphene.Int()
+
+    has_read = graphene.Field(HasReadType)
+
+    def mutate(self, info, username, book_title, rating):
+        user = UserModel.objects.get(username=username).id
+        book = Book.objects.get(title=book_title).id
+        has_read = read_book(book, user, rating)
+
+        return ReadBookMutation(has_read = has_read)
+
+class Mutation(graphene.ObjectType):
+    read_book = ReadBookMutation.Field()
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
