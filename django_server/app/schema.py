@@ -1,7 +1,7 @@
 import graphene
 import graphene_django
 from django.contrib.auth.backends import UserModel
-from .models import Book, HasRead, read_book
+from .models import Book, HasRead, read_book, average_rating
 
 class UserType(graphene_django.DjangoObjectType):
     is_admin = graphene.Boolean()
@@ -17,15 +17,7 @@ class BookType(graphene_django.DjangoObjectType):
     average_rating = graphene.Float()
 
     def resolve_average_rating(self, info):
-        all_book_reads = HasRead.objects.all()
-        this_book_reads = all_book_reads.filter(book=self.id)
-        book_ratings = list(map(lambda read: read.rating, this_book_reads))
-
-        # print(f"${self.title}: ${book_ratings}") # control
-
-        if book_ratings:
-            return sum(book_ratings) / len(book_ratings)
-        else: return None
+        return average_rating(self.id)
 
     class Meta:
         model = Book
@@ -58,9 +50,10 @@ class ReadBookMutation(graphene.Mutation):
 
     has_read = graphene.Field(HasReadType)
 
-    def mutate(self, info, username, book_title, rating):
+    def mutate(self, info, username, book_title, **kwargs):
         user = UserModel.objects.get(username=username).id
         book = Book.objects.get(title=book_title).id
+        rating = kwargs.get('rating')
         has_read = read_book(book, user, rating)
 
         return ReadBookMutation(has_read = has_read)

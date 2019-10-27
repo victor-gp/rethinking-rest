@@ -29,10 +29,19 @@ def read_book(book_id, user_id, rating):
     except:
         raise Exception(f'User with id {user_id} doesn\'t exist')
 
-    if rating < 0 or rating > 10:
+    if rating and (rating < 0 or rating > 10):
         raise Exception(f'Rating must be between 0 and 10')
 
     hasRead, created = HasRead.objects.get_or_create(user=user, book=book)
     hasRead.rating = rating
     hasRead.save()
     return hasRead
+
+def average_rating(book_id):
+    book_reads = HasRead.objects.filter(book=book_id)
+    ratings = book_reads.exclude(rating=None).values_list('rating', flat=True)
+
+    if ratings:
+        return sum(ratings) / ratings.count()
+    else:
+        return None
