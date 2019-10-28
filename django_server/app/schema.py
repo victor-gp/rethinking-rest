@@ -28,7 +28,8 @@ class HasReadType(graphene_django.DjangoObjectType):
 
 class Query(graphene.ObjectType):
     users = graphene.List(UserType)
-    books = graphene.List(BookType, fiction=graphene.Boolean())
+    books = graphene.List(BookType, fiction=graphene.Boolean(),
+        first=graphene.Int(), last=graphene.Int(), offset=graphene.Int())
 
     def resolve_users(self, info):
         return UserModel.objects.all()
@@ -40,7 +41,25 @@ class Query(graphene.ObjectType):
         if fiction is not None:
             q = q.filter(fiction=fiction)
 
+        first = kwargs.get('first')
+        last = kwargs.get('last')
+        offset = abs(kwargs.get('offset') or 0)
+        if first:
+            return q[offset : offset + first]
+        elif last:
+            return Query.paginate_last(q, last, offset)
+
         return q
+
+    def paginate_last(q, last, offset):
+        last_index = q.count()
+        end = last_index - offset
+        if end < 0: end = 0
+
+        start =  end - last
+        if start < 0: start = 0
+
+        return q[start:end]
 
 class ReadBookMutation(graphene.Mutation):
     class Arguments:
