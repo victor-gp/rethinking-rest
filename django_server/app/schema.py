@@ -28,8 +28,10 @@ class HasReadType(graphene_django.DjangoObjectType):
 
 class Query(graphene.ObjectType):
     users = graphene.List(UserType)
+    user = graphene.Field(UserType, id=graphene.Int(required=True))
     books = graphene.List(BookType, fiction=graphene.Boolean(),
         first=graphene.Int(), last=graphene.Int(), offset=graphene.Int())
+    book = graphene.Field(BookType, id=graphene.Int(required=True))
 
     def resolve_users(self, info):
         return UserModel.objects.all()
@@ -61,23 +63,29 @@ class Query(graphene.ObjectType):
 
         return q[start:end]
 
-class ReadBookMutation(graphene.Mutation):
+    def resolve_user(self, info, **kwargs):
+        return UserModel.objects.get(id=kwargs['id'])
+
+    def resolve_book(self, info, **kwargs):
+        return Book.objects.get(id=kwargs['id'])
+
+class ReadBook(graphene.Mutation):
     class Arguments:
-        username = graphene.String()
-        book_title = graphene.String()
+        username = graphene.String(required=True)
+        book_title = graphene.String(required=True)
         rating = graphene.Int()
 
     has_read = graphene.Field(HasReadType)
 
-    def mutate(self, info, username, book_title, **kwargs):
-        user = UserModel.objects.get(username=username).id
-        book = Book.objects.get(title=book_title).id
+    def mutate(self, info, **kwargs):
+        user = UserModel.objects.get(username=kwargs['username']).id
+        book = Book.objects.get(title=kwargs['book_title']).id
         rating = kwargs.get('rating')
+
         has_read = read_book(book, user, rating)
+        return ReadBook(has_read = has_read)
 
-        return ReadBookMutation(has_read = has_read)
+class Mutations(graphene.ObjectType):
+    read_book = ReadBook.Field()
 
-class Mutation(graphene.ObjectType):
-    read_book = ReadBookMutation.Field()
-
-schema = graphene.Schema(query=Query, mutation=Mutation)
+schema = graphene.Schema(query=Query, mutation=Mutations)
