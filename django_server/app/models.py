@@ -8,6 +8,16 @@ class Book(models.Model):
     fiction = models.BooleanField()
     published_year = models.IntegerField()
 
+    @property
+    def average_rating(self):
+        book_reads = self.read_by
+        ratings = book_reads.exclude(rating=None).values_list('rating', flat=True)
+
+        if ratings:
+            return sum(ratings) / ratings.count()
+        else:
+            return None
+
 
 class HasRead(models.Model):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='books_read')
@@ -36,12 +46,3 @@ def read_book(book_id, user_id, rating):
     hasRead.rating = rating
     hasRead.save()
     return hasRead
-
-def average_rating(book_id):
-    book_reads = HasRead.objects.filter(book=book_id)
-    ratings = book_reads.exclude(rating=None).values_list('rating', flat=True)
-
-    if ratings:
-        return sum(ratings) / ratings.count()
-    else:
-        return None

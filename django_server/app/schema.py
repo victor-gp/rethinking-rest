@@ -1,7 +1,7 @@
 import graphene
 import graphene_django
 from django.contrib.auth.backends import UserModel
-from .models import Book, HasRead, read_book, average_rating
+from .models import Book, HasRead, read_book
 from graphql import GraphQLError
 
 class UserType(graphene_django.DjangoObjectType):
@@ -16,9 +16,6 @@ class UserType(graphene_django.DjangoObjectType):
 
 class BookType(graphene_django.DjangoObjectType):
     average_rating = graphene.Float()
-
-    def resolve_average_rating(self, info):
-        return average_rating(self.id)
 
     class Meta:
         model = Book
