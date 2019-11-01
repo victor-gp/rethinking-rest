@@ -8,6 +8,16 @@ class Book(models.Model):
     fiction = models.BooleanField()
     published_year = models.IntegerField()
 
+    @property
+    def average_rating(self):
+        book_reads = self.read_by
+        ratings = book_reads.exclude(rating=None).values_list('rating', flat=True)
+
+        if ratings:
+            return sum(ratings) / ratings.count()
+        else:
+            return None
+
 
 class HasRead(models.Model):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='books_read')
@@ -29,7 +39,7 @@ def read_book(book_id, user_id, rating):
     except:
         raise Exception(f'User with id {user_id} doesn\'t exist')
 
-    if rating < 0 or rating > 10:
+    if rating and (rating < 0 or rating > 10):
         raise Exception(f'Rating must be between 0 and 10')
 
     hasRead, created = HasRead.objects.get_or_create(user=user, book=book)
