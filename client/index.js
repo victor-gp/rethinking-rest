@@ -32,6 +32,7 @@ const queryRepoList = `
           totalCount
         }
         ... commitFragment
+        viewerHasStarred
       }
     }
   }
@@ -79,7 +80,12 @@ $(window).ready(function() {
       $('ul.repos').empty();
       repos.nodes.forEach((repo) => {
         const card = `<li>
-        <h3>${repo.name}</h3>
+        <h3>
+          ${repo.name}
+          <span class="star" onClick="starHandler(this)">
+            ${repo.viewerHasStarred ? fullStar : emptyStar}
+          </span>
+        </h3>
         <p>${repo.openIssues.totalCount} open issues</p>
         <p>${repo.openPRs.totalCount} open PRs</p>
         <p>${repo.ref.target.history.totalCount} commits</p>
