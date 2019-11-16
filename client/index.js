@@ -33,15 +33,36 @@ const queryRepoList = `
         }
         ... commitFragment
         viewerHasStarred
+        id
       }
     }
   }
 }
 ` + commitFragment;
 
-let mutationAddStar;
+let mutationAddStar = `
+mutation addStar ($repoId: ID!) {
+  addStar (input: {starrableId: $repoId}) {
+    repo: starrable {
+      ... on Repository {
+        name
+        viewerHasStarred
+      }
+    }
+  }
+}`;
 
-let mutationRemoveStar;
+let mutationRemoveStar = `
+mutation removeStar ($repoId: ID!) {
+  removeStar (input: {starrableId: $repoId}) {
+    repo: starrable {
+      ... on Repository {
+        name
+        viewerHasStarred
+      }
+    }
+  }
+}`;
 
 function gqlRequest(query, variables, onSuccess) {
   // MAKE GRAPHQL REQUEST
@@ -65,9 +86,26 @@ function gqlRequest(query, variables, onSuccess) {
   });
 }
 
+function resetStar(starElement, viewerHasStarred) {
+  starElement.innerText =
+    viewerHasStarred ? fullStar : emptyStar;
+}
+
 function starHandler(element) {
   // STAR OR UNSTAR REPO BASED ON ELEMENT STATE
+  console.log(element);
 
+  if (element.innerText == fullStar) {
+    gqlRequest(mutationRemoveStar, {repoId: element.id}, (data) => {
+      console.log(data);
+      resetStar(element, data.removeStar.repo.viewerHasStarred);
+    })
+  } else {
+    gqlRequest(mutationAddStar, {repoId: element.id}, (data) => {
+      console.log(data);
+      resetStar(element, data.addStar.repo.viewerHasStarred);
+    })
+  }
 }
 
 $(window).ready(function() {
@@ -82,7 +120,7 @@ $(window).ready(function() {
         const card = `<li>
         <h3>
           ${repo.name}
-          <span class="star" onClick="starHandler(this)">
+          <span class="star" id=${repo.id} onClick="starHandler(this)">
             ${repo.viewerHasStarred ? fullStar : emptyStar}
           </span>
         </h3>
