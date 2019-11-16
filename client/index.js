@@ -93,19 +93,17 @@ function resetStar(starElement, viewerHasStarred) {
 
 function starHandler(element) {
   // STAR OR UNSTAR REPO BASED ON ELEMENT STATE
-  console.log(element);
-
+  let mutation = mutationAddStar
+  let mutationKey = 'addStar'
   if (element.innerText == fullStar) {
-    gqlRequest(mutationRemoveStar, {repoId: element.id}, (data) => {
-      console.log(data);
-      resetStar(element, data.removeStar.repo.viewerHasStarred);
-    })
-  } else {
-    gqlRequest(mutationAddStar, {repoId: element.id}, (data) => {
-      console.log(data);
-      resetStar(element, data.addStar.repo.viewerHasStarred);
-    })
+    mutation = mutationRemoveStar
+    mutationKey = 'removeStar'
   }
+
+  gqlRequest(mutation, {repoId: element.id}, (data) => {
+    console.log(data);
+    resetStar(element, data[mutationKey].repo.viewerHasStarred);
+  })
 }
 
 $(window).ready(function() {
