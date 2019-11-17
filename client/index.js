@@ -95,7 +95,7 @@ function starHandler(element) {
   // STAR OR UNSTAR REPO BASED ON ELEMENT STATE
   let mutation = mutationAddStar
   let mutationKey = 'addStar'
-  if (element.innerText == fullStar) {
+  if (element.innerText === fullStar) {
     mutation = mutationRemoveStar
     mutationKey = 'removeStar'
   }
@@ -115,12 +115,11 @@ $(window).ready(function() {
     if (repos.totalCount > 0) {
       $('ul.repos').empty();
       repos.nodes.forEach((repo) => {
+        const star = repo.viewerHasStarred ? fullStar : emptyStar;
         const card = `<li>
         <h3>
           ${repo.name}
-          <span class="star" id=${repo.id} onClick="starHandler(this)">
-            ${repo.viewerHasStarred ? fullStar : emptyStar}
-          </span>
+          <span class="star" id=${repo.id} onClick="starHandler(this)">${star}</span>
         </h3>
         <p>${repo.openIssues.totalCount} open issues</p>
         <p>${repo.openPRs.totalCount} open PRs</p>
